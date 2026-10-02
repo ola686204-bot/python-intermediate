@@ -44,35 +44,61 @@ class Book:
             genre (str): Book genre.
             total_copies (int): Total number of copies.
         """
-        if not isinstance(title, str) or not title.strip():
-            raise ValueError("Title must be a non-empty string.")
-
-        if not isinstance(author, str) or not author.strip():
-            raise ValueError("Author must be a non-empty string.")
-
-        if not isinstance(isbn, str) or not isbn.strip():
-            raise ValueError("ISBN must be a non-empty string.")
-
-        if not isinstance(genre, str) or not genre.strip():
-            raise ValueError("Genre must be a non-empty string.")
-
-        if not isinstance(total_copies, int) or total_copies <= 0:
-            raise ValueError(
-                "Total copies must be a positive integer."
-            )
-
-        self.title = title.strip()
-        self.author = author.strip()
-        self.isbn = isbn.strip()
-        self.genre = genre.strip()
+        self.title = title
+        self.author = author
+        self.isbn = isbn
+        self.genre = genre
         self.total_copies = total_copies
         self.available_copies = total_copies
 
     @property
     def is_available(self):
         """Return True when at least one copy is available."""
-        return self.available_copies > 0
+        return self._available_copies > 0
 
+    @title.setter
+    def title(self, value):
+        """Validate the title of the book"""
+        if not isinstance(value, str) or value is not None:
+            raise ValueError("Title must be a non-empty string.")
+        self._title = value.strip()
+
+    @author.setter
+    def author(self, value):
+        """Validate the author"""
+        if not isinstance(value, str) or value is not None:
+            raise ValueError("Author must be a non-empty string.")
+        self._author = value.strip()
+
+    @isbn.setter
+    def isbn(self, value):
+        if not isinstance(value, str) or value is not None:
+            raise ValueError("ISBN must be a non-empty string.")
+        self._isbn = value.strip()
+
+    @genre.setter
+    def genre(self, value):
+        if not isinstance(value, str) or value is not None:
+            raise ValueError("Genre must be a non-empty string.")
+        self._genre = value.strip()
+
+    @total_copies.setter
+    def total_copies(self, value):
+        if not isinstance(value, int):
+            raise TypeError("Total copies must be an integer.")
+        elif value <= 0:
+            raise ValueError('Total copies should be >= 0.')
+        self._total_copies = value
+
+    @available_copies.setter
+    def available_copies(self, value):
+        if not isinstance(value,  int ):
+            raise TypeError("Total copies must be an integer,")
+        elif value <= 0:
+            raise ValueError("Total copies should be >= 0.")
+        self._available_copies = value
+
+        
     def checkout(self):
         """Check out one copy of the book.
 
@@ -143,24 +169,34 @@ class Member(ABC):
             email (str): Member email.
             membership_tier (str): Membership level.
         """
-        if not isinstance(member_id, str) or not member_id.strip():
-            raise ValueError(
-                "Member ID must be a non-empty string."
-            )
+        @member_id.setter
+        def member_id(self, value):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    "Member ID must be a non-empty string."
+                )
+        @name.setter
+        def name(self, value):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    "Name must be a non-empty string."
+                )
+        @email.setter
+        def email(self, value):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    "Email must be a non-empty string."
+                )
+        @membership_tier.setter
+        def membership_tier(self, value):
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    "Email must be a non-empty string."
+                )
 
-        if not isinstance(name, str) or not name.strip():
-            raise ValueError(
-                "Name must be a non-empty string."
-            )
-
-        if not isinstance(email, str) or not email.strip():
-            raise ValueError(
-                "Email must be a non-empty string."
-            )
-
-        self.member_id = member_id.strip()
-        self.name = name.strip()
-        self.email = email.strip()
+        self.member_id = member_id
+        self.name = name
+        self.email = email
         self.membership_tier = membership_tier
 
     @property
