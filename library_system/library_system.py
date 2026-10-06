@@ -23,7 +23,6 @@ class LoanLimitExceededError(LibraryError):
 # ============================================================
 # BOOK CLASS
 # ============================================================
-
 class Book:
     """Represent a book in the library catalogue."""
 
@@ -35,15 +34,6 @@ class Book:
         genre,
         total_copies,
     ):
-        """Initialize a book.
-
-        Args:
-            title (str): Book title.
-            author (str): Book author.
-            isbn (str): Unique ISBN.
-            genre (str): Book genre.
-            total_copies (int): Total number of copies.
-        """
         self.title = title
         self.author = author
         self.isbn = isbn
@@ -52,99 +42,98 @@ class Book:
         self.available_copies = total_copies
 
     @property
-    def is_available(self):
-        """Return True when at least one copy is available."""
-        return self._available_copies > 0
+    def title(self):
+        return self._title
 
     @title.setter
     def title(self, value):
-        """Validate the title of the book"""
-        if not isinstance(value, str) or value is not None:
-            raise ValueError("Title must be a non-empty string.")
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                "Title must be a non-empty string."
+            )
         self._title = value.strip()
+
+    @property
+    def author(self):
+        return self._author
 
     @author.setter
     def author(self, value):
-        """Validate the author"""
-        if not isinstance(value, str) or value is not None:
-            raise ValueError("Author must be a non-empty string.")
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                "Author must be a non-empty string."
+            )
         self._author = value.strip()
+
+    @property
+    def isbn(self):
+        return self._isbn
 
     @isbn.setter
     def isbn(self, value):
-        if not isinstance(value, str) or value is not None:
-            raise ValueError("ISBN must be a non-empty string.")
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                "ISBN must be a non-empty string."
+            )
         self._isbn = value.strip()
+
+    @property
+    def genre(self):
+        return self._genre
 
     @genre.setter
     def genre(self, value):
-        if not isinstance(value, str) or value is not None:
-            raise ValueError("Genre must be a non-empty string.")
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                "Genre must be a non-empty string."
+            )
         self._genre = value.strip()
+
+    @property
+    def total_copies(self):
+        return self._total_copies
 
     @total_copies.setter
     def total_copies(self, value):
         if not isinstance(value, int):
-            raise TypeError("Total copies must be an integer.")
-        elif value <= 0:
-            raise ValueError('Total copies should be >= 0.')
+            raise TypeError(
+                "Total copies must be an integer."
+            )
+
+        if value <= 0:
+            raise ValueError(
+                "Total copies must be greater than 0."
+            )
+
         self._total_copies = value
+
+    @property
+    def available_copies(self):
+        return self._available_copies
 
     @available_copies.setter
     def available_copies(self, value):
-        if not isinstance(value,  int ):
-            raise TypeError("Total copies must be an integer,")
-        elif value <= 0:
-            raise ValueError("Total copies should be >= 0.")
+        if not isinstance(value, int):
+            raise TypeError(
+                "Available copies must be an integer."
+            )
+
+        if value < 0:
+            raise ValueError(
+                "Available copies cannot be negative."
+            )
+
+        if hasattr(self, "_total_copies"):
+            if value > self.total_copies:
+                raise ValueError(
+                    "Available copies cannot exceed total copies."
+                )
+
         self._available_copies = value
 
-        
-    def checkout(self):
-        """Check out one copy of the book.
-
-        Raises:
-            BookUnavailableError: If no copies are available.
-        """
-        if not self.is_available:
-            raise BookUnavailableError(
-                f"'{self.title}' has no available copies."
-            )
-
-        self.available_copies -= 1
-
-    def return_book(self):
-        """Return one copy of the book."""
-        if self.available_copies >= self.total_copies:
-            raise LibraryError(
-                f"All copies of '{self.title}' are already available."
-            )
-
-        self.available_copies += 1
-
-    def __str__(self):
-        """Return a readable string representation."""
-        return (
-            f"{self.title} by {self.author} "
-            f"(ISBN: {self.isbn})"
-        )
-
-    def __repr__(self):
-        """Return a detailed representation."""
-        return (
-            f"Book(title={self.title!r}, "
-            f"author={self.author!r}, "
-            f"isbn={self.isbn!r}, "
-            f"genre={self.genre!r}, "
-            f"total_copies={self.total_copies!r}, "
-            f"available_copies={self.available_copies!r})"
-        )
-
-    def __eq__(self, other):
-        """Compare books using their ISBN."""
-        if not isinstance(other, Book):
-            return NotImplemented
-
-        return self.isbn == other.isbn
+    @property
+    def is_available(self):
+        return self.available_copies > 0
 
 
 # ============================================================
