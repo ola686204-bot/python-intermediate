@@ -1,10 +1,13 @@
-"""
+""" 
     Analytics Engine
 A flexible engine that process raw transaction data exported
 from an e-commerce company database using composable pipeline of functions.
 """
 
 from functools import reduce
+import random
+from datetime import datetime, timedelta
+
 
 
 record = {
@@ -20,7 +23,7 @@ record = {
     'region': 'West Africa'
 }
 
-def enrich_transactions(transactions,discount_pct=0.1):
+def enrich_transactions(transactions):
     """Uses map to add computed fields to every record.
     Args:
         transactions:List of transaction dicts
@@ -28,9 +31,13 @@ def enrich_transactions(transactions,discount_pct=0.1):
     Returns: 
         New list where each record has total, discount, display id, and net_total. """
     def enrich_record(record):
-        gross_total = record["quantity"] * record["unit_price"],
-        discount_amount = record["quantity"] * record["unit_price"] * discount_pct
-        net_total = record["quantity"] * record["unit-price"] - record["quantity"] * record["unit_price"] * discount_pct
+        gross_total = record["quantity"] * record["unit_price"]
+        discount_amount = record["quantity"] * record["unit_price"] * record["discount_pct"] / 100
+        net_total = (
+    record["quantity"]
+    * record["unit_price"]
+    - discount_amount
+)
         display_id = record["id"] + "-" + record["customer"]
 
         return{
@@ -71,10 +78,11 @@ def total_revenue(transactions):
     Args:
         transactions: The list of transaction dicts."""
     return reduce(
-        lambda total,other_total : total + other_total, record["net_total"],
-        transactions,
-        0
-    )
+    lambda total, tx:
+        total + tx["net_total"],
+    transactions,
+    0
+)
 
 def summarize_by(transactions, group_key="category"):
     """Group records by group key.
@@ -95,11 +103,11 @@ def summarize_by(transactions, group_key="category"):
             }
         current_collect = collect[group]
         current_collect["count"] += 1
-        current_collect["total_revenue"] += 1
-        current_collect["average_order_value"] += 1
+        current_collect["total_revenue"] += record["net_total"]
+        current_collect["average_order_value"] += record["net_total"]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
-        return collector
-    grouped = reduce(reduce, transactions, {})
+        return collect
+    grouped = reduce(collector, transactions, {})
 
     for group_name in grouped:
         stats = grouped[group_name]
@@ -118,14 +126,334 @@ def build_pipeline(*steps):
         for step in steps:
             result = step(result)
         return result
-    return build_pipeline
+    return run_pipeline     
 
-def generate_report(transactions, *metrics, title="Report", **options):
-    """Generate a flexible sales report.
+
+def generate_report(
+    transactions,
+    *metrics,
+    title="Report",
+    **options
+):
+    """
+    Generate a configurable analytics report.
+
     Args:
-        transactions (list): List of enriched transactions.
-        *metrics: What to show
-        **options: How to show it.
+        transactions (list):
+            Enriched transaction records.
+
+        *metrics:
+            Metrics to include:
+            revenue
+            count
+            avg_order
+            by_category
+            by_region
+            top_customers
+
+        title (str):
+            Report title.
+
+        **options:
+            top_n (int):
+                Number of top customers.
+
+            currency (str):
+                Currency symbol/code.
+
+            show_rank (bool):
+                Show ranking numbers.
+
     Returns:
-        return report to the console."""
-   
+        str:
+            Formatted multi-line report.
+    """
+
+    currency = options.get("currency", "USD")
+    top_n = options.get("top_n", 5)
+    show_rank = options.get("show_rank", True)
+
+    lines = []
+
+    lines.append(title)
+    lines.append("=" * len(title))
+    lines.append("")
+
+    #
+    # Revenue
+    #
+    if "revenue" in metrics:
+
+        revenue = total_revenue(transactions)
+
+        lines.append("REVENUE")
+        lines.append("-" * 40)
+        lines.append(
+            f"Total Revenue: "
+            f"{currency} {revenue:,.2f}"
+        )
+        lines.append("")
+
+    #
+    # Count
+    #
+    if "count" in metrics:
+
+        lines.append("TRANSACTION COUNT")
+        lines.append("-" * 40)
+        lines.append(
+            f"Transactions: "
+            f"{len(transactions)}"
+        )
+        lines.append("")
+
+    #
+    # Average Order
+    #
+    if "avg_order" in metrics:
+
+        avg_order = 0
+
+        if transactions:
+
+            avg_order = (
+                total_revenue(transactions)
+                /
+                len(transactions)
+            )
+
+        lines.append("AVERAGE ORDER VALUE")
+        lines.append("-" * 40)
+
+        lines.append(
+            f"Average Order: "
+            f"{currency} "
+            f"{avg_order:,.2f}"
+        )
+
+        lines.append("")
+
+    #
+    # By Category
+    #
+    if "by_category" in metrics:
+
+        lines.append("CATEGORY BREAKDOWN")
+        lines.append("-" * 40)
+
+        summary = summarize_by(
+            transactions,
+            "category"
+        )
+
+        for category, stats in summary.items():
+
+            lines.append(
+                f"{category}"
+            )
+
+            lines.append(
+                f"  Count: "
+                f"{stats['count']}"
+            )
+
+            lines.append(
+                f"  Revenue: "
+                f"{currency} "
+                f"{stats['total_revenue']:,.2f}"
+            )
+
+            lines.append(
+                f"  Avg Order: "
+                f"{currency} "
+                f"{stats['avg_order_value']:,.2f}"
+            )
+
+            lines.append(
+                f"  Top Product: "
+                f"{stats['top_product']}"
+            )
+
+            lines.append("")
+
+    #
+    # By Region
+    #
+    if "by_region" in metrics:
+
+        lines.append("REGIONAL BREAKDOWN")
+        lines.append("-" * 40)
+
+        summary = summarize_by(
+            transactions,
+            "region"
+        )
+
+        for region, stats in summary.items():
+
+            lines.append(
+                f"{region}"
+            )
+
+            lines.append(
+                f"  Count: "
+                f"{stats['count']}"
+            )
+
+            lines.append(
+                f"  Revenue: "
+                f"{currency} "
+                f"{stats['total_revenue']:,.2f}"
+            )
+
+            lines.append(
+                f"  Avg Order: "
+                f"{currency} "
+                f"{stats['avg_order_value']:,.2f}"
+            )
+
+            lines.append(
+                f"  Top Product: "
+                f"{stats['top_product']}"
+            )
+
+            lines.append("")
+
+    #
+    # Top Customers
+    #
+    if "top_customers" in metrics:
+
+        customer_totals ={}
+
+        for tx in transactions:
+
+            customer_totals[
+                tx["customer"]
+            ] += tx["net_total"]
+
+        ranking = sorted(
+            customer_totals.items(),
+            key=lambda item: item[1],
+            reverse=True
+        )
+
+        lines.append("TOP CUSTOMERS")
+        lines.append("-" * 40)
+
+        for position, (
+            customer,
+            revenue
+        ) in enumerate(
+            ranking[:top_n],
+            start=1
+        ):
+
+            if show_rank:
+
+                lines.append(
+                    f"{position}. "
+                    f"{customer} "
+                    f"({currency} "
+                    f"{revenue:,.2f})"
+                )
+
+            else:
+
+                lines.append(
+                    f"{customer} "
+                    f"({currency} "
+                    f"{revenue:,.2f})"
+                )
+
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+
+
+def generate_sample_data(n, **overrides):
+    """
+    Generate random e-commerce transaction records.
+
+    Uses enumerate() to create sequential transaction IDs and zip()
+    to pair randomly selected customers with products.
+
+    Args:
+        n (int): Number of transaction records to generate.
+        **overrides: Optional field values that should override
+            generated values for all records.
+
+    Returns:
+        list[dict]: List of transaction records.
+    """
+    customers = [
+        "Ada Lovelace",
+        "Alan Turing",
+        "Grace Hopper",
+        "Katherine Johnson",
+        "Tim Berners-Lee",
+        "Margaret Hamilton",
+        "Linus Torvalds",
+        "James Gosling",
+        "Guido van Rossum",
+        "Dennis Ritchie"
+    ]
+
+    products = [
+        ("Laptop Pro", "Electronics"),
+        ("Wireless Mouse", "Electronics"),
+        ("Office Chair", "Furniture"),
+        ("Standing Desk", "Furniture"),
+        ("Python Handbook", "Books"),
+        ("Data Science Guide", "Books"),
+        ("Smartphone X", "Electronics"),
+        ("USB-C Hub", "Electronics"),
+        ("Monitor 27\"", "Electronics"),
+        ("Notebook Pack", "Stationery")
+    ]
+
+    statuses = ["completed", "pending", "cancelled"]
+    regions = [
+        "West Africa",
+        "East Africa",
+        "North America",
+        "Europe",
+        "Asia Pacific"
+    ]
+
+    # Randomly pair customers and products using zip()
+    customer_choices = random.choices(customers, k=n)
+    product_choices = random.choices(products, k=n)
+
+    paired_records = zip(customer_choices, product_choices)
+
+    transactions = []
+
+    for index, (customer, (product, category)) in enumerate(
+        paired_records,
+        start=1
+    ):
+        record = {
+            "id": f"TXN-{index:03d}",
+            "customer": customer,
+            "product": product,
+            "category": category,
+            "quantity": random.randint(1, 10),
+            "unit_price": round(random.uniform(10, 5000), 2),
+            "discount_pct": random.choice([0, 5, 10, 15, 20]),
+            "status": random.choice(statuses),
+            "date": (
+                datetime(2024, 1, 1)
+                + timedelta(days=random.randint(0, 364))
+            ).strftime("%Y-%m-%d"),
+            "region": random.choice(regions)
+        }
+
+        # Apply user-specified overrides
+        record.update(overrides)
+
+        transactions.append(record)
+
+    return transactions

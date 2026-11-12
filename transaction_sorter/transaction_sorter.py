@@ -14,7 +14,8 @@ def bubble_sort_transactions(transactions, key):
         key: use to sort in ascending order.
         
     Time complexity: O(n²) average and worst case.
-    Space complexity: O(1) — sorts in place.
+    Space complexity
+    : O(1) — sorts in place.
     """
     n = len(transactions)
     for i in range(n):
@@ -159,7 +160,7 @@ def display_results(transactions):
     """
 
     print("\n" + "-" * 35)
-    print("       TRANSACTION MANAGEMENT SYSTEM")
+    print("TRANSACTION MANAGEMENT SYSTEM")
     print("-" * 35)
 
     # 1. Display original transactions
