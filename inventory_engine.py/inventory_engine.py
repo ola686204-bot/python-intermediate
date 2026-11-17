@@ -174,11 +174,6 @@ def make_threshold_filter(field, *, operator='gte', value):
         value=value
     )
 
-
-# --------------------------------------------------
-# 4. COMPUTE TOTALS USING REDUCE
-# --------------------------------------------------
-
 def compute_totals(records):
     """Calculate inventory totals using reduce."""
 

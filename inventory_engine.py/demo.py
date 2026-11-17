@@ -26,10 +26,6 @@ from inventory_engine import (
 )
 
 
-# ---------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------
-
 CATEGORIES = [
     "Electronics",
     "Stationery",
@@ -51,10 +47,6 @@ SUPPLIERS = [
     "Elite Distribution",
 ]
 
-
-# ---------------------------------------------------------
-# Generate sample inventory
-# ---------------------------------------------------------
 
 def create_sample_inventory():
     """Create at least 50 sample inventory records."""
@@ -88,11 +80,6 @@ def create_sample_inventory():
 
     return records
 
-
-# ---------------------------------------------------------
-# Main demonstration
-# ---------------------------------------------------------
-
 def main():
     """Run all inventory demonstrations."""
 
@@ -107,10 +94,6 @@ def main():
     for record in records[:5]:
         print(record)
 
-    # -----------------------------------------------------
-    # 2. Enrich records
-    # -----------------------------------------------------
-
     print("\n2. ENRICH RECORDS")
     print("-" * 60)
 
@@ -121,10 +104,7 @@ def main():
     for record in enriched_records[:3]:
         print(record)
 
-    # -----------------------------------------------------
-    # 3. Build SKU index
-    # -----------------------------------------------------
-
+    
     print("\n3. BUILD SKU INDEX")
     print("-" * 60)
 
@@ -140,10 +120,7 @@ def main():
     print("\nRecord belonging to that SKU:")
     print(sku_index[first_sku])
 
-    # -----------------------------------------------------
-    # 4. Demonstrate pagination
-    # -----------------------------------------------------
-
+    
     print("\n4. PAGINATION")
     print("-" * 60)
 
@@ -163,9 +140,6 @@ def main():
     for record in page_two:
         print(record)
 
-    # -----------------------------------------------------
-    # 5. Group by region
-    # -----------------------------------------------------
 
     print("\n5. GROUP BY REGION")
     print("-" * 60)
@@ -175,9 +149,7 @@ def main():
     for region, region_records in grouped.items():
         print(f"{region}: {len(region_records)} records")
 
-    # -----------------------------------------------------
-    # 6. Cached category statistics
-    # -----------------------------------------------------
+    
 
     print("\n6. CACHED CATEGORY STATISTICS")
     print("-" * 60)
@@ -206,10 +178,7 @@ def main():
 
     print(cached_category_stats.cache_info())
 
-    # -----------------------------------------------------
-    # 7. Threshold filters
-    # -----------------------------------------------------
-
+    
     print("\n7. COMPOSED THRESHOLD FILTERS")
     print("-" * 60)
 
@@ -246,10 +215,6 @@ def main():
     for record in filtered_records[:10]:
         print(record)
 
-    # -----------------------------------------------------
-    # 8. Chain low-stock sources
-    # -----------------------------------------------------
-
     print("\n8. CHAIN LOW-STOCK SOURCES")
     print("-" * 60)
 
@@ -279,13 +244,8 @@ def main():
     for record in low_stock_records[:15]:
         print(record)
 
-    # -----------------------------------------------------
-    # Finished
-    # -----------------------------------------------------
-
-    print("\n" + "=" * 60)
     print("DEMO COMPLETE")
-    print("=" * 60)
+
 
 
 if __name__ == "__main__":
